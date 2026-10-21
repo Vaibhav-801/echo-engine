@@ -1,8 +1,10 @@
 import csv
 import json
 from pathlib import Path
+import pandas as pd
 
-
+RAW = Path.home() / "Projects/ECHO/research/datasets/raw"
+OUT = Path.home() / "Projects/ECHO/research/datasets/prepared"
 def write_jsonl(path, rows):
     """Write a list of dictionaries to a file, one JSON object per line."""
     path = Path(path)
@@ -17,8 +19,8 @@ def read_csv(path):
     """Read a CSV file into a list of dictionaries, one per row."""
     with open(path, encoding="utf-8") as f:
         return list(csv.DictReader(f))
+    
 
-import pandas as pd
 
 NAMES = ("admiration", "amusement", "anger", "annoyance", "approval", "caring", "confusion",
          "curiosity", "desire", "disappointment", "disapproval", "disgust", "embarrassment",
