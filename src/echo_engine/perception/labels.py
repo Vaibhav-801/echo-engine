@@ -1,5 +1,8 @@
 """Label vocabularies and the maps from each dataset's labels to ECHO's shared emotions."""
 from __future__ import annotations
+from dataclasses import dataclass
+
+from sympy import true
 
 ECHO_EMOTIONS = ("neutral", "happy", "sad", "angry", "anxious", "surprised", "disgusted")
 
@@ -96,6 +99,43 @@ MAPS = {
     "ed": ED_TO_ECHO,
 }
 
+@dataclass(frozen=True)
+class Task:
+    name: str
+    kind: str
+    classes: tuple
+
+
+TASKS= {
+    "meld": Task("meld", "single", tuple(sorted(MELD_TO_ECHO))),
+    "goemotions": Task("goemotions", "multi", tuple(sorted(GOEMOTIONS_TO_ECHO))),
+    "dd_emotion": Task("dd_emotion", "single", tuple(sorted(DD_EMOTION_TO_ECHO))),
+    "ed": Task("ed", "single", tuple(sorted(ED_TO_ECHO))),
+    "dd_act": Task("dd_act", "single", ("commissive", "directive", "inform", "question")),
+    "echo": Task("echo", "single", tuple(ECHO_EMOTIONS)),
+}
+
+DATASET_TASKS={
+    "goemotions": ["goemotions"],
+    "meld": ["meld"],
+    "ed": ["ed"],
+    "dailydialog": ["dd_emotion", "dd_act"],
+}
+
+def echo_target(dataset: str, y: dict):
+    """Return the shared ECHO emotion for one example, or None."""
+    if dataset == "dailydialog":
+        return to_echo("dd_emotion", y["dd_emotion"])
+    if dataset == "goemotions":
+        mapped = [to_echo("goemotions", name) for name in y["goemotions"]]
+        mapped = [m for m in mapped if m is not None]
+        if not mapped:
+            return None
+        for m in mapped:
+            if m != "neutral":
+                return m
+        return "neutral"
+    return to_echo(dataset, y[dataset])
 
 def to_echo(dataset: str, label: str) -> str:
     """Translate one dataset label into an ECHO emotion."""
